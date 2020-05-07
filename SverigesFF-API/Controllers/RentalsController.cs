@@ -109,11 +109,14 @@ namespace SverigesFF_API.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<Rental>> DeleteRental(int id)
         {
-            var rental = await _context.Rentals.FindAsync(id);
+            var rental = await _context.Rentals.Where(i => i.Id == id).Include(m => m.Movie).Include(f => f.Filmstudio).FirstOrDefaultAsync();
             if (rental == null)
             {
                 return NotFound();
             }
+
+            var movie = rental.Movie;
+            movie.AdjustQtyOnMovieReturn();
 
             _context.Rentals.Remove(rental);
             await _context.SaveChangesAsync();
